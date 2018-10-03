@@ -31,18 +31,21 @@ router.get("/edit/:id", ensureAuthenticated, (req, res) => {
   });
 });
 
+//post a new story
 router.post("/", (req, res) => {
-  let allowComment;
-  if (req.body.allowComment) {
-    allowComment = true;
+  let allowComments;
+  console.log(req.body.allowComments);
+
+  if (req.body.allowComments == "on") {
+    allowComments = true;
   } else {
-    allowComment = false;
+    allowComments = false;
   }
   const newStory = {
     title: req.body.title,
     body: req.body.body,
     status: req.body.status,
-    allowComment,
+    allowComments,
     user: req.user
   };
 
@@ -108,18 +111,31 @@ router.delete("/delete/:id", (req, res) => {
   });
 });
 
+//post a comment
 router.post("/comment/:id", (req, res) => {
-  Story.findById(req.params.id).then(story => {
-    const newComment = {
-      commentBody: req.body.commentBody,
-      commentUser: req.user.id
-    };
 
-    story.comments.unshift(newComment);
-    story.save().then(() => {
-      res.redirect(`/stories/show/${story.id}`);
-    });
-  });
+  let child = require("child_process").spawn
+
+  let process = child('python', ["./Spam_and_Toxic/spam_and_toxic.py",
+    req.body.commentBody
+  ])
+
+
+  process.stdout.on('data', (data) => {
+
+    console.log(data.toString())
+  })
+  //   Story.findById(req.params.id).then(story => {
+  //     const newComment = {
+  //       commentBody: req.body.commentBody,
+  //       commentUser: req.user.id
+  //     };
+
+  //     story.comments.unshift(newComment);
+  //     story.save().then(() => {
+  //       res.redirect(`/stories/show/${story.id}`);
+  //     });
+  //   });
 });
 
 module.exports = router;
